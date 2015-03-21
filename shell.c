@@ -58,3 +58,17 @@ void PrintCommandList(struct Command* command){
 		ptr = ptr->nextCommand;
 	}
 }
+
+void DestroyCommandList(struct Command* command){
+	struct Command* ptr = command;
+	struct Command* next = NULL;
+	int i;
+	while(ptr!=NULL){
+		next = ptr->nextCommand;
+		for(i = 0; i<ptr->argcount; i++){
+			free(ptr->args[i]);
+		}
+		free(ptr);
+		ptr = next;
+	}
+}

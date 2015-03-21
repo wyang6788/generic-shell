@@ -16,3 +16,5 @@ void ReadLines(char* input);
 struct Command* ParseCommandLine(char* input);
 
 void PrintCommandList(struct Command* command);
+
+void DestroyCommandList(struct Command* command);
