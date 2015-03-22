@@ -23,9 +23,13 @@ void ReadLines(char* input);
 
 struct Command* ParseCommandLine(char* input);
 
+void ExecuteCommands(struct Command* command);
+
 void PrintCommandList(struct Command* command);
 
 void DestroyCommandList(struct Command* command);
+
+void DestroyBuiltins(struct Builtins* builtins);
 
 int f_cd(struct Command* command);
 

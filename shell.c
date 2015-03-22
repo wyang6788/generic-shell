@@ -46,6 +46,14 @@ struct Command* ParseCommandLine(char* input){
 	return first;
 }
 
+void ExecuteCommands(struct Command* command){
+	struct Builtins* builtins = MakeBuiltins();
+	
+	//Check for builtins, execute,  otherwise execute nonbuiltin commands
+
+	DestroyBuiltins(builtins);
+}
+
 void PrintCommandList(struct Command* command){
 	struct Command* ptr = command;
 	int i;
@@ -116,4 +124,9 @@ struct Builtins* MakeBuiltins(){
 	builtins->next->f = f_exit;
 	builtins->next->next = NULL;
 	return builtins;
+}
+
+void DestroyBuiltins(struct Builtins* builtins){
+	free(builtins->next);
+	free(builtins);
 }

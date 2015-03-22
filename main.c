@@ -7,7 +7,7 @@ int main(){
 		struct Command* commandList = ParseCommandLine(input);
 		PrintCommandList(commandList);
 
-		//execute commands somewhere around here
+		ExecuteCommands(commandList);
 
 		DestroyCommandList(commandList);
 	}
