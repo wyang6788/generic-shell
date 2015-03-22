@@ -88,7 +88,7 @@ int f_fork(struct Command* command) {
 	switch(pid=fork()) {
 		case 0:
 			printf("Child Process");
-			ExecuteCommands(command->next);
+			executeCommands(command->next);
 			exit(0);
 		default:
 			sleep(5);

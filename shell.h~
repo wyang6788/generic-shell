@@ -31,10 +31,6 @@ void DestroyCommandList(struct Command* command);
 
 void DestroyBuiltins(struct Builtins* builtins);
 
-int f_fork(struct Command* command);
-
-void f_execve(struct Command* command);
-
 int f_cd(struct Command* command);
 
 int f_exit(struct Command* command);
