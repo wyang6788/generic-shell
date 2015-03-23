@@ -101,7 +101,6 @@ int f_fork(struct Command* command) {
 			exit(0);
 		default:
 			printf("Parent Process");
-			ExecuteCommands(command->next);
 			exit(0);
 		case -1:
 			perror("The fork broke");

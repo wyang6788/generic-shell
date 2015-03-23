@@ -123,6 +123,18 @@ void f_execve(struct Command* command) {
 	exit(1);
 }
 
+int f_pipe(struct Command* command) {
+	if (pipe(command->fd) == 0)
+	{
+		//I feel like there should be more to pipe, such as writing to files
+		//But I am not sure yet how to implement it.
+		return 1;
+	} else {
+		printf("Pipe failed.");
+		return 0;
+	}
+}
+
 int f_cd(struct Command* command){
 	if(!command->args[1]){
 		if(chdir(getenv("HOME"))==0){
