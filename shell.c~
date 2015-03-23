@@ -48,16 +48,21 @@ struct Command* ParseCommandLine(char* input){
 
 void ExecuteCommands(struct Command* command){
 	struct Builtins* builtins = MakeBuiltins();
-	
+	struct Builtins* ptr = builtins;
 	if(command!=NULL) {
-		while(builtins!=NULL) {
-			printf("test");
-			if(strcmp(builtins->name,command->args[0])==0) {
-				int status = (*builtins->f)(command);
+		while(ptr!=NULL) {
+			if(strcmp(ptr->name,command->args[0])==0) {
+				int status = (*ptr->f)(command);
 				printf("%d\n",status);
 				break;
 			}
-			builtins = builtins->next;	
+			ptr = ptr->next;	
+		}
+	}
+	else{
+		while(command!=NULL){
+
+			command = command->next;
 		}
 	}
 	

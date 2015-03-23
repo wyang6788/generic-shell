@@ -119,11 +119,11 @@ int f_fork(struct Command* command) {
 void f_execve(struct Command* command) {
 	char *args[] = {"ls","-aF","/",0};
 	char *env[] = { 0 };
-	if(!command->args[1]) {
+	if(!command->args[0]) {
 		printf("Nothing to Execute");
 		return;	
 	} else {
-		execve(command->args[1],args,env);
+		execve(command->args[0],args,env);
 	}
 	perror("execve");
 	exit(1);
