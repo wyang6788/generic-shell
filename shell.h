@@ -4,7 +4,7 @@
 
 typedef struct Command{
 	char* args[50];
-	int fd;
+	int fd[2];
 	int argcount;
 	struct Command* next;
 } Command_t;
