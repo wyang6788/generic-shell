@@ -58,12 +58,11 @@ void ExecuteCommands(struct Command* command){
 			}
 			ptr = ptr->next;	
 		}
+		
 	}
-	else{
-		while(command!=NULL){
-
-			command = command->next;
-		}
+	while(command!=NULL){
+		f_pipe(command);
+		command = command->next;
 	}
 	
 	//Check for builtins, execute,  otherwise execute nonbuiltin commands
