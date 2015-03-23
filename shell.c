@@ -48,10 +48,19 @@ struct Command* ParseCommandLine(char* input){
 
 void ExecuteCommands(struct Command* command){
 	struct Builtins* builtins = MakeBuiltins();
+
+	if(!command==NULL) {
+		while(!(strcmp(builtins->name,"end")==0)) {
+			if(strcmp(builtins->name,command->args[0])==0) {
+				int status = (*builtins->f)(command);
+				printf("%d\n",status);
+			}
+			builtins = builtins->next;	
+		}
+	}
 	
-
 	//Check for builtins, execute,  otherwise execute nonbuiltin commands
-
+	
 	DestroyBuiltins(builtins);
 }
 
@@ -91,8 +100,8 @@ int f_fork(struct Command* command) {
 			ExecuteCommands(command->next);
 			exit(0);
 		default:
-			sleep(5);
 			printf("Parent Process");
+			ExecuteCommands(command->next);
 			exit(0);
 		case -1:
 			perror("The fork broke");
@@ -108,7 +117,7 @@ void f_execve(struct Command* command) {
 		printf("Nothing to Execute");
 		return;	
 	} else {
-		execve(command->next->args[0],args,env);
+		execve(command->args[1],args,env);
 	}
 	perror("execve");
 	exit(1);
@@ -155,7 +164,8 @@ struct Builtins* MakeBuiltins(){
 	builtins->next = malloc(sizeof(struct Builtins));
 	builtins->next->name = "exit";
 	builtins->next->f = f_exit;
-	builtins->next->next = NULL;
+	builtins->next->next = malloc(sizeof(struct Builtins));
+	builtins->next->next->name = "end";
 	return builtins;
 }
 
