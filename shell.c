@@ -123,10 +123,24 @@ void f_execve(struct Command* command) {
 }
 
 int f_pipe(struct Command* command) {
+	int pid;
 	if (pipe(command->fd) == 0)
 	{
-		//I feel like there should be more to pipe, such as writing to files
-		//But I am not sure yet how to implement it.
+		switch(pid=fork()) {
+		case 0:
+			dup2(command->fd[0], 0);
+			close(command->fd[1]);
+			f_execve(command);
+			exit(0);
+		default:
+			dup2(command->fd[1], 1);
+			close(command->fd[0]);
+			f_execve(command->next);
+			exit(0);
+		case -1:
+			perror("The fork broke");
+			exit(1);	
+		}
 		return 1;
 	} else {
 		printf("Pipe failed.");
