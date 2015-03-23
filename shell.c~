@@ -1,12 +1,6 @@
 // Group Names: Peter Zhang, William Yang, Ellis Pomirchy, Joseph Pestonit, Philip Beauchea
 #include "shell.h"
 
-/**
-*	Make Command - Generages an empty command.
-*	Param - None
-*	Return - Empty generated command
-*
-*/
 struct Command* MakeCommand(){
 	struct Command* command = malloc(sizeof(struct Command));
 	command->argcount = 0;
@@ -14,23 +8,10 @@ struct Command* MakeCommand(){
 	return command;
 }
 
-/**
-*	ReadLines - Read console input
-*	Param - Console input
-*	Return - None
-*
-*/
 void ReadLines(char* input){
 	if(isatty(0)) printf("$\n");
 	if(fgets(input,BUFFERSIZE,stdin)!=NULL) printf("%s",input);
 }
-
-/**
-*	Parse Command Line - Tokenizes console input, and generates linked list of commands.
-*	Param - Console input
-*	Return - Command linked list with reference to the first command
-*
-*/
 
 struct Command* ParseCommandLine(char* input){
 	struct Command* first;
@@ -67,12 +48,6 @@ struct Command* ParseCommandLine(char* input){
 	return first;
 }
 
-/**
-*	Execute Commands - Checks commands for builtins, then runs
-*	Param - First command to execute (with rest of linked list of commands)
-*	Return - None
-*
-*/
 void ExecuteCommands(struct Command* command){
 	struct Builtins* builtins = MakeBuiltins();
 	struct Builtins* ptr = builtins;
@@ -91,13 +66,7 @@ void ExecuteCommands(struct Command* command){
 	
 	DestroyBuiltins(builtins);
 }
-/**
-*	PipeFirst - runs first item in pipe
-*
-*
-*
-*
-*/
+
 int PipeFirst(struct Command* command){
 	if(command->next!=NULL){
 		pipe(command->next->fd);
