@@ -5,9 +5,9 @@ int main(){
 	while(1){
 		ReadLines(input);
 		struct Command* commandList = ParseCommandLine(input);
-
-		ExecuteCommands(commandList);
-
-		DestroyCommandList(commandList);
+		if(commandList!=NULL){
+			ExecuteCommands(commandList);
+			DestroyCommandList(commandList);
+		}
 	}
 }

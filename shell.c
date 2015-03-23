@@ -19,7 +19,6 @@ struct Command* ParseCommandLine(char* input){
 	TokenizerT* tokenizer = TKCreate(" \n", input);
 	char* token = TKGetNextToken(tokenizer);
 	if(token==NULL){
-		printf("There is absolutely nothing in the command line \n");
 		return NULL;
 	}	
 
@@ -34,7 +33,11 @@ struct Command* ParseCommandLine(char* input){
 		else{
 			command->args[CommandCounter] = strdup(token);
 			command->argcount++;
-			CommandCounter++;	
+			CommandCounter++;
+			if(command->argcount>50){
+				fprintf(stderr,"Too many arguments\n");
+				return NULL;
+			}	
 		}
 	
 		free(token);
@@ -50,8 +53,7 @@ void ExecuteCommands(struct Command* command){
 	if(command!=NULL) {
 		while(ptr!=NULL) {
 			if(strcmp(ptr->name,command->args[0])==0) {
-				int status = (*ptr->f)(command);
-				printf("%d\n",status);
+				(*ptr->f)(command);
 				break;
 			}
 			ptr = ptr->next;	
