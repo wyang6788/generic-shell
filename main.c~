@@ -1,3 +1,5 @@
+// Group Names: Peter Zhang, William Yang, Ellis Pomirchy, Joseph Pestonit, Philip Beauchea
+
 #include "shell.h"
 
 int main(){

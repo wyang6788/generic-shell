@@ -4,7 +4,7 @@
 /**
 *	Make Command - Generages an empty command.
 *	Param - None
-*	Return - Empty generated command
+*	Return - Empty command
 *
 */
 struct Command* MakeCommand(){
@@ -28,7 +28,7 @@ void ReadLines(char* input){
 /**
 *	Parse Command Line - Tokenizes console input, and generates linked list of commands.
 *	Param - Console input
-*	Return - Command linked list with reference to the first command
+*	Return - Linked list of commands with reference to the first command
 *
 */
 
@@ -36,12 +36,15 @@ struct Command* ParseCommandLine(char* input){
 	struct Command* first;
 	struct Command* command;
 	int CommandCounter = 0;
+
+	// Tokenize
 	TokenizerT* tokenizer = TKCreate(" \n", input);
 	char* token = TKGetNextToken(tokenizer);
 	if(token==NULL){
 		return NULL;
 	}	
-
+	
+	// Generate commands based on tokens
 	command = MakeCommand();
 	first = command;
 	while(token!=NULL){
@@ -68,12 +71,13 @@ struct Command* ParseCommandLine(char* input){
 }
 
 /**
-*	Execute Commands - Checks commands for builtins, then runs
+*	Execute Commands - Checks commands for builtins, then runs any commands through a pipeline
 *	Param - First command to execute (with rest of linked list of commands)
 *	Return - None
 *
 */
 void ExecuteCommands(struct Command* command){
+	// Check for builtins
 	struct Builtins* builtins = MakeBuiltins();
 	struct Builtins* ptr = builtins;
 	if(command!=NULL) {
@@ -87,21 +91,23 @@ void ExecuteCommands(struct Command* command){
 		
 	}
 
+	// Run Pipeline
 	PipeFirst(command);		
 	
 	DestroyBuiltins(builtins);
 }
+
 /**
-*	PipeFirst - runs first item in pipe
-*
-*
-*
+*	Pipe First - Runs first command in pipe, then runs the rest of commands in pipe
+*	Param - Linked list of commands
+*	Return - 1 after completion
 *
 */
 int PipeFirst(struct Command* command){
 	if(command->next!=NULL){
 		pipe(command->next->fd);
 	}
+	// Do first pipe
 	int pid, status;
 	switch(pid=fork()){
 		case 0:
@@ -113,6 +119,7 @@ int PipeFirst(struct Command* command){
 		default:
 			break;
 	}
+	// Pipe rest of commands
 	command = command->next;
 	while(command!=NULL){
 		PipeRest(command);
@@ -126,11 +133,18 @@ int PipeFirst(struct Command* command){
 	return 1;
 }
 
+/**
+*	Pipe Rest - Pipes the rest of the commands through
+*	Param - Linked list of commands
+*	Return - 0 when complete
+*
+*/
 int PipeRest(struct Command* command){
 	if(command->next!=NULL){
 		pipe(command->next->fd);	
 	}
 	int pid;
+	// Fork and execute	
 	switch(pid=fork()){
 		case 0:
 			if(command->next!=NULL){
@@ -145,6 +159,12 @@ int PipeRest(struct Command* command){
 	return 0;
 }
 
+/**
+*	Print Command List - Prints list of commands for easy debugging
+*	Param - Linked list of commands
+*	Return - None (prints list of commands)
+*
+*/
 void PrintCommandList(struct Command* command){
 	struct Command* ptr = command;
 	int i;
@@ -156,6 +176,12 @@ void PrintCommandList(struct Command* command){
 	}
 }
 
+/**
+*	Destroy Command List - Frees command list to free memory
+*	Param - Linked list of commands
+*	Return - None
+*
+*/
 void DestroyCommandList(struct Command* command){
 	struct Command* ptr = command;
 	struct Command* next = NULL;
@@ -170,64 +196,14 @@ void DestroyCommandList(struct Command* command){
 	}
 }
 
-int f_fork(struct Command* command) {
-	int pid;
-
-	switch(pid=fork()) {
-		case 0:
-			printf("Child Process");
-			ExecuteCommands(command->next);
-			exit(0);
-		default:
-			printf("Parent Process");
-			exit(0);
-		case -1:
-			perror("The fork broke");
-			exit(1);	
-	}
-	return(pid);
-}
-
-void f_execve(struct Command* command) {
-	char *args[] = {"ls","-aF","/",0};
-	char *env[] = { 0 };
-	if(!command->args[0]) {
-		printf("Nothing to Execute");
-		return;	
-	} else {
-		execve(command->args[0],args,env);
-	}
-	perror("execve");
-	exit(1);
-}
-
-int f_pipe(struct Command* command) {
-	int pid;
-	if (pipe(command->fd) == 0)
-	{
-		switch(pid=fork()) {
-		case 0:
-			dup2(command->fd[0], 0);
-			close(command->fd[1]);
-			f_execve(command);
-			exit(0);
-		default:
-			dup2(command->fd[1], 1);
-			close(command->fd[0]);
-			f_execve(command->next);
-			exit(0);
-		case -1:
-			perror("The fork broke");
-			exit(1);	
-		}
-		return 1;
-	} else {
-		printf("Pipe failed.");
-		return 0;
-	}
-}
-
+/**
+*	Built in change directory - Changes directory to directory listed in the first command
+*	Param - Linked List of commands
+*	Return - Return 1 if no error. 0 otherwise
+*
+*/
 int f_cd(struct Command* command){
+	// Given no second argument, go home
 	if(command->argcount==1){
 		if(chdir(getenv("HOME"))==0){
 			return 1;		
@@ -237,10 +213,12 @@ int f_cd(struct Command* command){
 			return 0;
 		}
 	}
+	// If there are too many arguments
 	else if(command->argcount>2){
 		printf("ERROR: too many arguments\n");
 		return 0;
 	}
+	// Otherwise, go to specified directory
 	else{
 		if(chdir(command->args[1])==0){
 			return 1;
@@ -252,6 +230,12 @@ int f_cd(struct Command* command){
 	}
 }
 
+/**
+*	Built in Exit - Exits out of shell display the second argument of exit command.
+*	Param - Linked list of commands
+*	Return - None (Exits)
+*
+*/
 int f_exit(struct Command* command){
 	if(!command->args[1]){
 		exit(0);
@@ -261,6 +245,11 @@ int f_exit(struct Command* command){
 	}
 }
 
+/**
+*	Make builtins - Set list of builtins to check commands against
+*	Param - None
+*	Return - List of builtins in our shell
+*/
 struct Builtins* MakeBuiltins(){
 	struct Builtins* builtins = malloc(sizeof(struct Builtins));
 	builtins->name = "cd";
@@ -272,6 +261,11 @@ struct Builtins* MakeBuiltins(){
 	return builtins;
 }
 
+/**
+*	Destroy Builtins - Frees builtins, freeing memory
+*	Param - Linked List of builtins
+*	Return - None
+*/
 void DestroyBuiltins(struct Builtins* builtins){
 	free(builtins->next);
 	free(builtins);

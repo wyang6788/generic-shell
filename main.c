@@ -2,6 +2,10 @@
 
 #include "shell.h"
 
+/**
+*	Main - Parses input and runs based on input
+*
+*/
 int main(){
 	char input[BUFFERSIZE];
 	while(1){
