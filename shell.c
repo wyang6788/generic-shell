@@ -2,7 +2,7 @@
 
 struct Command* MakeCommand(){
 	struct Command* command = malloc(sizeof(struct Command));
-	command->fd = 0; //Not sure what to do with pipe file descriptors as of yet
+//	command->fd = 0; //Not sure what to do with pipe file descriptors as of yet
 	command->argcount = 0;
 	command->next = NULL;
 	return command;
@@ -49,11 +49,12 @@ struct Command* ParseCommandLine(char* input){
 void ExecuteCommands(struct Command* command){
 	struct Builtins* builtins = MakeBuiltins();
 
-	if(!command==NULL) {
-		while(!(strcmp(builtins->name,"end")==0)) {
+	if(command!=NULL) {
+		while(builtins!=NULL) {
 			if(strcmp(builtins->name,command->args[0])==0) {
 				int status = (*builtins->f)(command);
 				printf("%d\n",status);
+				break;
 			}
 			builtins = builtins->next;	
 		}
@@ -149,16 +150,16 @@ int f_pipe(struct Command* command) {
 }
 
 int f_cd(struct Command* command){
-	if(!command->args[1]){
+	if(command->argcount==1){
 		if(chdir(getenv("HOME"))==0){
 			return 1;		
 		}
 		else{	
-			printf("ERROR: cd failed\n");
+			printf("ERROR: cd failed, couldn't return to home directory\n");
 			return 0;
 		}
 	}
-	else if(command->args[2]){
+	else if(command->argcount>2){
 		printf("ERROR: too many arguments\n");
 		return 0;
 	}
@@ -167,7 +168,7 @@ int f_cd(struct Command* command){
 			return 1;
 		}
 		else{
-			printf("ERROR: cd failed\n");
+			printf("ERROR: cd failed, directory doesn't exist\n");
 			return 0;
 		}
 	}
@@ -189,8 +190,7 @@ struct Builtins* MakeBuiltins(){
 	builtins->next = malloc(sizeof(struct Builtins));
 	builtins->next->name = "exit";
 	builtins->next->f = f_exit;
-	builtins->next->next = malloc(sizeof(struct Builtins));
-	builtins->next->next->name = "end";
+	builtins->next->next = NULL; 
 	return builtins;
 }
 
