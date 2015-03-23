@@ -2,7 +2,6 @@
 
 struct Command* MakeCommand(){
 	struct Command* command = malloc(sizeof(struct Command));
-//	command->fd = 0; //Not sure what to do with pipe file descriptors as of yet
 	command->argcount = 0;
 	command->next = NULL;
 	return command;
@@ -62,13 +61,6 @@ void ExecuteCommands(struct Command* command){
 
 	PipeFirst(command);		
 	
-/*	while(command!=NULL){
-		f_pipe(command);
-		command = command->next;
-	}*/
-	
-	//Check for builtins, execute,  otherwise execute nonbuiltin commands
-	
 	DestroyBuiltins(builtins);
 }
 
@@ -85,8 +77,6 @@ int PipeFirst(struct Command* command){
 			}
 			execvp(command->args[0],command->args);
 		default:
-		/*	while((pid=wait(&status))!=-1)
-				fprintf(stderr,"process %d exits with %d\n", pid, WEXITSTATUS(status));*/
 			break;
 	}
 	command = command->next;
@@ -106,7 +96,7 @@ int PipeRest(struct Command* command){
 	if(command->next!=NULL){
 		pipe(command->next->fd);	
 	}
-	int pid, status;
+	int pid;
 	switch(pid=fork()){
 		case 0:
 			if(command->next!=NULL){
@@ -116,8 +106,6 @@ int PipeRest(struct Command* command){
 			close(command->fd[1]);
 			execvp(command->args[0],command->args);
 		default:
-		//	while((pid=wait(&status))!=-1)
-		//		fprintf(stderr,"process %d exits with %d\n", pid, WEXITSTATUS(status));
 			break;
 	}
 	return 0;
