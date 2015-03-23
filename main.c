@@ -5,7 +5,6 @@ int main(){
 	while(1){
 		ReadLines(input);
 		struct Command* commandList = ParseCommandLine(input);
-		PrintCommandList(commandList);
 
 		ExecuteCommands(commandList);
 

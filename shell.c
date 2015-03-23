@@ -38,7 +38,6 @@ struct Command* ParseCommandLine(char* input){
 			CommandCounter++;	
 		}
 	
-		printf("token: %s\n",token);
 		free(token);
 		token = TKGetNextToken(tokenizer);
 	}
@@ -60,25 +59,77 @@ void ExecuteCommands(struct Command* command){
 		}
 		
 	}
-	while(command!=NULL){
+
+	PipeFirst(command);		
+	
+/*	while(command!=NULL){
 		f_pipe(command);
 		command = command->next;
-	}
+	}*/
 	
 	//Check for builtins, execute,  otherwise execute nonbuiltin commands
 	
 	DestroyBuiltins(builtins);
 }
 
+int PipeFirst(struct Command* command){
+	if(command->next!=NULL){
+		pipe(command->next->fd);
+	}
+	int pid, status;
+	switch(pid=fork()){
+		case 0:
+			if(command->next!=NULL){
+				dup2(command->next->fd[1],1);
+				close(command->next->fd[0]);
+			}
+			execvp(command->args[0],command->args);
+		default:
+		/*	while((pid=wait(&status))!=-1)
+				fprintf(stderr,"process %d exits with %d\n", pid, WEXITSTATUS(status));*/
+			break;
+	}
+	command = command->next;
+	while(command!=NULL){
+		PipeRest(command);
+		close(command->fd[0]); close(command->fd[1]);
+		command = command->next;
+	}
+	
+	while((pid=wait(&status))!=-1)
+		fprintf(stderr,"process %d exits with %d\n", pid, WEXITSTATUS(status));
+	
+	return 1;
+}
+
+int PipeRest(struct Command* command){
+	if(command->next!=NULL){
+		pipe(command->next->fd);	
+	}
+	int pid, status;
+	switch(pid=fork()){
+		case 0:
+			if(command->next!=NULL){
+				dup2(command->next->fd[1],1);
+			}
+			dup2(command->fd[0],0);
+			close(command->fd[1]);
+			execvp(command->args[0],command->args);
+		default:
+		//	while((pid=wait(&status))!=-1)
+		//		fprintf(stderr,"process %d exits with %d\n", pid, WEXITSTATUS(status));
+			break;
+	}
+	return 0;
+}
+
 void PrintCommandList(struct Command* command){
 	struct Command* ptr = command;
 	int i;
 	while(ptr!=NULL){
-		printf("Commands: ");
 		for(i = 0; i < ptr->argcount; i++){
 			printf("%s, ",ptr->args[i]);
 		}	
-		printf("\n");
 		ptr = ptr->next;
 	}
 }

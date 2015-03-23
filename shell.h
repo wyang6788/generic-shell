@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include "tokenizer.h"
+#include <sys/wait.h>
 #define BUFFERSIZE 1000
 
 typedef struct Command{
@@ -30,6 +31,10 @@ void PrintCommandList(struct Command* command);
 void DestroyCommandList(struct Command* command);
 
 void DestroyBuiltins(struct Builtins* builtins);
+
+int PipeFirst(struct Command* command);
+
+int PipeRest(struct Command* command);
 
 int f_fork(struct Command* command);
 
